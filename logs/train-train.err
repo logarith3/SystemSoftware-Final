@@ -1,0 +1,5 @@
+trainer: child 1975593 exited with status 0
+trainer: child 1975594 exited with status 0
+backward_layer: saved parameters to logs/model_params.txt
+trainer: child 1975597 exited with status 0
+trainer: child 1975600 exited with status 0

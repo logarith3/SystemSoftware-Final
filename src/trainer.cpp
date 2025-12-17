@@ -15,55 +15,64 @@ namespace
 {
     volatile std::sig_atomic_t g_child_exited = 0;
 
-    void sigchld_handler(int)
-    {
-        // TODO: mark that at least one child process has exited.
-        // Hint: set the global flag g_child_exited to a non-zero value.
-        //
-        // This flag can be used in the main loop to notice that a SIGCHLD
-        // was delivered and then call wait()/waitpid() to reap children.
-    }
+void sigchld_handler(int s)
+{
+    (void)s;
+    
+   g_child_exited=1;
+}
 
-    void set_cloexec(int fd)
-    {
-        // TODO: mark this file descriptor as close-on-exec using fcntl().
-        //
-        // 1. Use fcntl(fd, F_GETFD) to get current flags.
-        // 2. If the call succeeds, OR the result with FD_CLOEXEC.
-        // 3. Use fcntl(fd, F_SETFD, new_flags) to update.
-        //
-        // This prevents child processes (after exec) from inheriting
-        // these pipe descriptors unintentionally.
-    }
 
-    int spawn_child(const char *prog,
-                    char *const argv[],
-                    int stdin_fd,
-                    int stdout_fd)
-    {
-        // TODO: fork a child process, hook up its stdin/stdout, and exec 'prog'.
-        //
-        // Required behavior:
-        //   - Call fork().
-        //   - On error (pid < 0), print an error with std::perror("fork")
-        //     and return -1.
-        //
-        //   - In the child (pid == 0):
-        //       * If stdin_fd >= 0 and stdin_fd != STDIN_FILENO,
-        //         dup2(stdin_fd, STDIN_FILENO); on error, perror and _exit(1).
-        //       * If stdout_fd >= 0 and stdout_fd != STDOUT_FILENO,
-        //         dup2(stdout_fd, STDOUT_FILENO); on error, perror and _exit(1).
-        //       * Call execvp(prog, argv).
-        //         On error, print with std::perror("execvp") and _exit(1).
-        //
-        //   - In the parent:
-        //       * Simply return the child's PID (the value from fork()).
-        //
-        // This function does NOT close any file descriptors; the caller
-        // (trainer::run) remains responsible for closing unused pipe ends.
-        return -1; // placeholder return to keep the skeleton compilable
-    }
+void set_cloexec(int f)
+{
+   int val;
+   val = fcntl(f ,F_GETFD); 
+   
+   if(val>=0){
+      val|=FD_CLOEXEC;
+      fcntl(f, F_SETFD , val);
+   }
+}
 
+int spawn_child(const char *p, char *const arg[], int i_fd, int o_fd)
+{
+   pid_t pid;
+   pid = fork();
+
+   if(pid < 0) {
+      perror("fork fail");
+      return -1;
+   }
+
+   if (pid==0) 
+   {
+      // child process
+      // input fd check
+      if(i_fd >= 0 && i_fd != 0) {
+         if(dup2(i_fd , 0) < 0) { // 0번이 stdin
+             perror("dup input err");
+             _exit(1);
+         }
+      }
+
+      if (o_fd >= 0 && o_fd != 1) {
+
+          if (dup2(o_fd , 1) < 0) {
+             perror("dup output fail");
+             _exit(1);
+          }
+      }
+
+      // run!!
+      execvp(p , arg);
+      
+
+      perror("exec error");
+      _exit(1);
+   }
+   
+   return pid;
+}
 
 } // namespace
 

@@ -1,0 +1,5 @@
+backward_layer: no model file at logs/model_params.txt, using initial parameters
+trainer: child 1973775 exited with status 0
+trainer: child 1973776 exited with status 0
+trainer: child 1973777 exited with status 0
+trainer: child 1973778 exited with status 0

@@ -1,0 +1,5 @@
+backward_layer: loaded parameters from logs/model_params.txt
+trainer: child 1990424 exited with status 0
+trainer: child 1990425 exited with status 0
+trainer: child 1990426 exited with status 0
+trainer: child 1990427 exited with status 0
